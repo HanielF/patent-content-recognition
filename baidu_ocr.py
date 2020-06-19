@@ -42,7 +42,7 @@ class Baidu_OCR:
         self.sk = sk
 
         self.access_token = self.get_access_token()
-        self.request_url = request_url + "?access_token=" + access_token
+        self.request_url = request_url + "?access_token=" + self.access_token
 
         self.language_type = language_type
         self.detect_direction = detect_direction
@@ -59,7 +59,7 @@ class Baidu_OCR:
         host = 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={}&client_secret={}'.format(
             self.ak, self.sk)
         response = requests.get(host)
-        return response.json()
+        return response.json().get("access_token")
 
     def get_img_text(self, img_path):
         '''
