@@ -41,7 +41,7 @@ class Baidu_OCR:
         self.ak = ak
         self.sk = sk
 
-        self.access_token = self.get_access_token(ak, sk)
+        self.access_token = self.get_access_token()
         self.request_url = request_url + "?access_token=" + access_token
 
         self.language_type = language_type
@@ -49,7 +49,7 @@ class Baidu_OCR:
         self.paragraph = paragraph
         self.probability = probability
 
-    def get_access_token():
+    def get_access_token(self):
         '''
         Desc：
             获取access_token并返回
@@ -61,7 +61,7 @@ class Baidu_OCR:
         response = requests.get(host)
         return response.json()
 
-    def get_img_text(img_path):
+    def get_img_text(self, img_path):
         '''
         Desc：
             使用百度OCR识别图片内容
