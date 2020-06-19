@@ -9,12 +9,22 @@
 '''
 import baidu_ocr
 
+IMAGEFOLDER = './images/'
+TEXTFOLDER = './text/'
+
 if __name__ == "__main__":
     ak = '5aCLlrovDN7DYI6WhIeFGYCN'
     sk = 'mkCGTzUxO9xgHkXmht3tGNEfLZNfShmG'
-    img_path = './images/test1.png'
     request_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
+
+    img_name = 'test1.png'
+    img_path = IMAGEFOLDER + img_name
+    text_path = TEXTFOLDER + img_name.split('.')[0] + '.txt'
 
     ocr = baidu_ocr.Baidu_OCR(ak, sk, request_url, detect_direction='true')
     img_text = ocr.get_img_text(img_path)
     print(img_text)
+
+    with open(text_path, 'w') as f:
+        f.write(img_text)
+
