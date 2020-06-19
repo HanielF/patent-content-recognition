@@ -17,7 +17,6 @@ class Baidu_OCR:
     def __init__(self,
                  ak,
                  sk,
-                 img_path,
                  request_url="https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic",
                  language_type='CHN_ENG',
                  detect_direction='false',
@@ -27,8 +26,6 @@ class Baidu_OCR:
         Args：
             ak: string  --  官网获取的API Key
             sk: string  --  官网获取的Secret Key
-            img_path: string  --  图像数据，base64编码后进行urlencode，要求base64编码和urlencode后大小不超过4M，
-                                  最短边至少15px，最长边最大4096px,支持jpg/jpeg/png/bmp格式
             request_url: string  --  请求的地址，默认通用文字识别高精度类型
                                      通用文字识别："https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
                                      通用文字识别含位置："https://aip.baidubce.com/rest/2.0/ocr/v1/general"
@@ -43,12 +40,6 @@ class Baidu_OCR:
         '''
         self.ak = ak
         self.sk = sk
-
-        if self.img_path is None:
-            raise ValueError("Error: Please input img_path!")
-        if not os.path.isfile(img_path):
-            raise ValueError("Error: img file does not exist!")
-        self.img_path = img_path
 
         self.access_token = self.get_access_token(ak, sk)
         self.request_url = request_url + "?access_token=" + access_token
@@ -70,15 +61,23 @@ class Baidu_OCR:
         response = requests.get(host)
         return response.json()
 
-    def get_img_text():
+    def get_img_text(img_path):
         '''
         Desc：
             使用百度OCR识别图片内容
+        Args:
+            img_path: string  --  图像数据，base64编码后进行urlencode，要求base64编码和urlencode后大小不超过4M，
+                                  最短边至少15px，最长边最大4096px,支持jpg/jpeg/png/bmp格式
         Returns：
             res: string  --  识别的结果
         '''
+        if img_path is None:
+            raise ValueError("Error: Please input img_path!")
+        if not os.path.isfile(img_path):
+            raise ValueError("Error: img file does not exist!")
+
         # 二进制方式打开图片文件
-        f = open(self.img_path, 'rb')
+        f = open(img_path, 'rb')
         img = base64.b64encode(f.read())
 
         params = {

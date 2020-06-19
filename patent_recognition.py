@@ -15,4 +15,6 @@ if __name__ == "__main__":
     img_path = './images/test1.png'
     request_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
 
-    ocr = baidu_ocr.Baidu_OCR(ak, sk, img_path, request_url, detect_direction='true')
+    ocr = baidu_ocr.Baidu_OCR(ak, sk, request_url, detect_direction='true')
+    img_text = ocr.get_img_text(img_path)
+    print(img_text)
