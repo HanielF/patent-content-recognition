@@ -65,7 +65,7 @@ def convert(origin_file, target_file, options=[]):
             os.system('cp ' + f + ' .')
             print("==> Copy origin file {} to current directory.".format(os.path.basename(f)))
 
-            print("==> Convert origin file {} to target file {}.".format(origin_name, target_name))
+            print("==> Convert origin file {} to target file {}.".format(origin_name, target_name[i]))
             options = ' '.join(options)
             os.system('convert -density 300 -quality 100 {} {} {}'.format(options, origin_name, target_name[i]))
 
