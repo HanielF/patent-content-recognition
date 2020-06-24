@@ -133,3 +133,6 @@ text/
 
 # vscode
 .vscode/
+
+# test
+test.py
