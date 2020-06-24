@@ -22,30 +22,50 @@ def convert(origin_file, target_file, options=[]):
     Returns：
         None
     '''
-    if type(origin_file) not in [string, list] or type(target_file) not in [string, list]:
-        raise TypeError("Type error: origin_file and target_file should be string or list")
+    if type(origin_file) not in [str, list] or type(target_file) not in [str, list]:
+        print("Type error: origin_file and target_file should be string or list")
+        exit(1)
 
-    origin_file, target_file = list(origin_file), list(target_file)
+    origin_file, target_file = [origin_file], [target_file]
     if len(origin_file) != len(target_file):
-        raise ValueError("Value error: origin_file object size should be consistent with target_file")
+        print("Value error: origin_file object size should be consistent with target_file")
+        exit(1)
 
     # create sub dir for each origin file
     target_dir = []
     target_name = []
-    for t in target_file:
-        target_dir.append(os.path.dirname(t))
-        target_name.append(os.path.basename(t))
-        if not os.path.exists(t_dir):
-            os.system('mkdir -p ' + t_dir)
+    try:
+        for t in target_file:
+            t_dir = os.path.dirname(t)
+            target_dir.append(t_dir)
+            target_name.append(os.path.basename(t))
+            if not os.path.exists(t_dir):
+                os.system('mkdir -p ' + t_dir)
+    except Exception as e:
+        print("==> Error: failed to create target directories.")
+        exit(1)
 
     # convert each origin file to target file
-    for i, f in enumerate(origin_file):
-        f = os.path.abspath(f)
-        origin_name = os.path.basename(f)
-        os.system('cd ' + target_dir[i])
-        os.system('cp ' + f + ' .')
-        os.system('convert -density 300 -quality 100 {} {}'.format(origin_name, target_name))
-        os.system('cd -')
+    try:
+        for i, f in enumerate(origin_file):
+            f = os.path.abspath(f)
+            origin_name = os.path.basename(f)
 
+            origin_dir = os.getcwd()
+            os.chdir(target_dir[i])
+            print("==> Change current work directory to: {}".format(target_dir[i]))
 
+            os.system('cp ' + f + ' .')
+            print("==> Copy origin file {} to current directory.".format(os.path.basename(f)))
 
+            print("==> Convert origin file {} to target file {}.".format(origin_name, target_name))
+            os.system('convert -density 300 -quality 100 {} {}'.format(origin_name, target_name[i]))
+
+            os.system('rm ' + origin_name)
+            print("==> Remove file " + origin_name)
+
+            os.chdir(origin_dir)
+
+        print("==> Convert successfully!")
+    except Exception as e:
+        print("==> Convert error:\n" + str(e))
