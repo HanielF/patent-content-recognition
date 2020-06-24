@@ -17,15 +17,19 @@ if __name__ == "__main__":
     sk = 'mkCGTzUxO9xgHkXmht3tGNEfLZNfShmG'
     request_url = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
 
-    img_name = 'test1.png'
+    img_name = 'test1.jpg'
     img_path = IMAGEFOLDER + img_name
     text_path = TEXTFOLDER + img_name.split('.')[0] + '.txt'
 
-    ocr = baidu_ocr.Baidu_OCR(ak, sk, request_url, language_type='auto_detect', detect_direction='true')
+    ocr = baidu_ocr.Baidu_OCR(ak,
+                              sk,
+                              request_url,
+                              language_type='auto_detect',
+                              detect_direction='true')
     img_text = ocr.get_img_text(img_path).get("words_result")
     print(img_text)
 
     with open(text_path, 'w', encoding='utf-8') as f:
         for i in img_text:
-            f.write(i['words'].replace(" ",'') + '\n')
-
+            res = i['words'].replace(" ", '')
+            f.write("{}, {}\n".format(res, len(res)))
