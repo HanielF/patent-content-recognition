@@ -26,7 +26,8 @@ def convert(origin_file, target_file, options=[]):
         print("Type error: origin_file and target_file should be string or list")
         exit(1)
 
-    origin_file, target_file = [origin_file], [target_file]
+    origin_file = origin_file if type(origin_file) is list else [origin_file]
+    target_file = target_file if type(target_file) is list else [target_file]
     if len(origin_file) != len(target_file):
         print("Value error: origin_file object size should be consistent with target_file")
         exit(1)
