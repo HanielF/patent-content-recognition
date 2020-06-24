@@ -37,11 +37,17 @@ def convert(origin_file, target_file, options=[]):
     target_name = []
     try:
         for t in target_file:
+            t_name = os.path.basename(t)
             t_dir = os.path.dirname(t)
-            target_dir.append(t_dir)
-            target_name.append(os.path.basename(t))
-            if not os.path.exists(t_dir):
-                os.system('mkdir -p ' + t_dir)
+
+            target_name.append(t_name)
+            sub_dir = os.path.join(t_dir, t_name.split('.')[0])
+            target_dir.append(sub_dir)
+
+            if not os.path.exists(sub_dir):
+                os.system('mkdir -p ' + sub_dir)
+                print("==> Create sub directory " + sub_dir)
+
     except Exception as e:
         print("==> Error: failed to create target directories.")
         exit(1)
