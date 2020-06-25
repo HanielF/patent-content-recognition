@@ -9,6 +9,7 @@
 '''
 
 import os
+import sys
 
 def convert(origin_file, target_file, options=[]):
     '''
@@ -24,13 +25,13 @@ def convert(origin_file, target_file, options=[]):
     '''
     if type(origin_file) not in [str, list] or type(target_file) not in [str, list]:
         print("Type error: origin_file and target_file should be string or list")
-        exit(1)
+        sys.exit(1)
 
     origin_file = origin_file if type(origin_file) is list else [origin_file]
     target_file = target_file if type(target_file) is list else [target_file]
     if len(origin_file) != len(target_file):
         print("Value error: origin_file object size should be consistent with target_file")
-        exit(1)
+        sys.exit(1)
 
     # create sub dir for each origin file
     target_dir = []
@@ -57,7 +58,7 @@ def convert(origin_file, target_file, options=[]):
 
     except Exception as e:
         print("==> Error: failed to create target directories.")
-        exit(1)
+        sys.exit(1)
 
     # convert each origin file to target file
     try:
