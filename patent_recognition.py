@@ -105,4 +105,4 @@ if __name__ == "__main__":
                               REQUEST,
                               language_type=LANGUAGE_TYPE,
                               detect_direction=DETECT_DIRECTION)
-    res_text = recognize_img(images_path, ocr, text_path, save=Tr)
+    res_text = recognize_img(images_path, ocr, text_path, save=True)
