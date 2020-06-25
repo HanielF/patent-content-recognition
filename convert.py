@@ -68,6 +68,7 @@ def convert(origin_file, target_file, options=[]):
             print("==> Convert origin file {} to target file {}.".format(origin_name, target_name[i]))
             options = ' '.join(options)
             os.system('convert -density 300 -quality 100 {} {} {}'.format(options, origin_name, target_name[i]))
+            os.system('convert -limit memory 5GiB -limit map 6GiB -define registry:temporary-path=./ -density 300 -quality 100 {} {} {}'.format(options, origin_name, target_name[i]))
 
             os.system('rm ' + origin_name)
             print("==> Remove file " + origin_name)
