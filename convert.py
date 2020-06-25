@@ -35,18 +35,25 @@ def convert(origin_file, target_file, options=[]):
     # create sub dir for each origin file
     target_dir = []
     target_name = []
+    res_origin = []
     try:
-        for t in target_file:
+        for i, t in enumerate(target_file):
             t_name = os.path.basename(t)
             t_dir = os.path.dirname(t)
 
-            target_name.append(t_name)
             sub_dir = os.path.join(t_dir, t_name.split('.')[0])
-            target_dir.append(sub_dir)
 
+            # if it was not converted before, convert it
             if not os.path.exists(sub_dir):
+                target_name.append(t_name)
+                target_dir.append(sub_dir)
+                res_origin.append(origin_file[i])
                 os.system('mkdir -p ' + sub_dir)
-                print("==> Create sub directory " + sub_dir)
+                print("==> Create sub directory {}.".format(sub_dir))
+            # continue if it exists
+            else:
+                print("==> {} already exists, skip it.".format(sub_dir))
+
 
     except Exception as e:
         print("==> Error: failed to create target directories.")
@@ -54,7 +61,7 @@ def convert(origin_file, target_file, options=[]):
 
     # convert each origin file to target file
     try:
-        for i, f in enumerate(origin_file):
+        for i, f in enumerate(res_origin):
             f = os.path.abspath(f)
             origin_name = os.path.basename(f)
 
