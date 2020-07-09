@@ -45,7 +45,7 @@ def convert(origin_file, target_file, options=[]):
             sub_dir = os.path.join(t_dir, t_name.split('.')[0])
 
             # if it was not converted before, convert it
-            if not os.path.exists(sub_dir):
+            if not os.path.exists(sub_dir) or os.path.exists(sub_dir) and len(os.listdir(sub_dir)) == 0:
                 target_name.append(t_name)
                 target_dir.append(sub_dir)
                 res_origin.append(origin_file[i])
