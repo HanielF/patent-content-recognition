@@ -28,6 +28,7 @@ def get_dir_files(dir_path=None, extend_path=False):
         返回dir_path下所有的非目录文件，并以包含路径的形式返回
     Args：
         dir_path: string/list  --  需要遍历的所有目录
+        extend_path: Bool  --  是否拼接路径
     Returns：
         res: list(string)  --  以带路径的形式返回所有目录下的文件
     '''
@@ -78,8 +79,8 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
             try:
                 with open(text_path[i], 'w', encoding='utf-8') as f:
                     for text in img_text:
-                        res = text['words'].replace(" ", '')
-                        f.write("{} ".format(res))
+                        tmp_text = text['words'].replace(" ", '')
+                        f.write("{}\n".format(tmp_text))
             except Exception as e:
                 raise Exception(e)
     return res
