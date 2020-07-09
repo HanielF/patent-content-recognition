@@ -28,6 +28,7 @@ def get_dir_files(dir_path=None, extend_path=False):
         返回dir_path下所有的非目录文件，并以包含路径的形式返回
     Args：
         dir_path: string/list  --  需要遍历的所有目录
+        extend_path: Bool  --  是否拼接路径
     Returns：
         res: list(string)  --  以带路径的形式返回所有目录下的文件
     '''
@@ -78,8 +79,8 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
             try:
                 with open(text_path[i], 'w', encoding='utf-8') as f:
                     for text in img_text:
-                        res = text['words'].replace(" ", '')
-                        f.write("{} ".format(res))
+                        tmp_text = text['words'].replace(" ", '')
+                        f.write("{}\n".format(tmp_text))
             except Exception as e:
                 raise Exception(e)
     return res
@@ -96,13 +97,25 @@ if __name__ == "__main__":
 
     target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
 
-    images_path = get_dir_files(target_subdirs, extend_path=True)
-    text_basename = [os.path.basename(x).split('.')[0] + '.txt' for x in images_path]
-    text_path = [os.path.join(TEXTFOLDER, x) for x in text_basename]
-
     ocr = baidu_ocr.Baidu_OCR(AK,
                               SK,
                               REQUEST,
                               language_type=LANGUAGE_TYPE,
                               detect_direction=DETECT_DIRECTION)
-    res_text = recognize_img(images_path, ocr, text_path, save=Tr)
+
+    res_text = []
+    for subdir in target_subdirs:
+        text_base_dir = os.path.basename(subdir)
+        text_subdir = os.path.join(TEXTFOLDER, text_base_dir)
+
+        if not os.path.exists(text_subdir):
+            os.mkdir(text_subdir)
+
+        images_path = get_dir_files(subdir, extend_path=True)
+        if len(images_path) == 0:
+            continue
+        text_basename = [os.path.basename(x).split('.')[0] + '.txt' for x in images_path]
+        text_path = [os.path.join(text_subdir, x) for x in text_basename]
+
+        img_text = recognize_img(images_path, ocr, text_path, save=True)
+        res_text.append(img_text)

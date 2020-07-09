@@ -9,6 +9,7 @@
 '''
 
 import os
+import sys
 
 def convert(origin_file, target_file, options=[]):
     '''
@@ -24,37 +25,44 @@ def convert(origin_file, target_file, options=[]):
     '''
     if type(origin_file) not in [str, list] or type(target_file) not in [str, list]:
         print("Type error: origin_file and target_file should be string or list")
-        exit(1)
+        sys.exit(1)
 
     origin_file = origin_file if type(origin_file) is list else [origin_file]
     target_file = target_file if type(target_file) is list else [target_file]
     if len(origin_file) != len(target_file):
         print("Value error: origin_file object size should be consistent with target_file")
-        exit(1)
+        sys.exit(1)
 
     # create sub dir for each origin file
     target_dir = []
     target_name = []
+    res_origin = []
     try:
-        for t in target_file:
+        for i, t in enumerate(target_file):
             t_name = os.path.basename(t)
             t_dir = os.path.dirname(t)
 
-            target_name.append(t_name)
             sub_dir = os.path.join(t_dir, t_name.split('.')[0])
-            target_dir.append(sub_dir)
 
-            if not os.path.exists(sub_dir):
+            # if it was not converted before, convert it
+            if not os.path.exists(sub_dir) or os.path.exists(sub_dir) and len(os.listdir(sub_dir)) == 0:
+                target_name.append(t_name)
+                target_dir.append(sub_dir)
+                res_origin.append(origin_file[i])
                 os.system('mkdir -p ' + sub_dir)
-                print("==> Create sub directory " + sub_dir)
+                print("==> Create sub directory {}.".format(sub_dir))
+            # continue if it exists
+            else:
+                print("==> {} already exists, skip it.".format(sub_dir))
+
 
     except Exception as e:
         print("==> Error: failed to create target directories.")
-        exit(1)
+        sys.exit(1)
 
     # convert each origin file to target file
     try:
-        for i, f in enumerate(origin_file):
+        for i, f in enumerate(res_origin):
             f = os.path.abspath(f)
             origin_name = os.path.basename(f)
 
