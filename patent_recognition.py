@@ -21,8 +21,8 @@ AK = '5aCLlrovDN7DYI6WhIeFGYCN'
 SK = 'mkCGTzUxO9xgHkXmht3tGNEfLZNfShmG'
 REQUEST_GENERAL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
 REQUEST_ACCURATE = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
-REQUEST = REQUEST_ACCURATE
-LANGUAGE_TYPE = 'auto_detect'
+REQUEST = REQUEST_GENERAL
+LANGUAGE_TYPE = 'ENG'
 DETECT_DIRECTION = 'true'
 
 def get_dir_files(dir_path=None, extend_path=False):
@@ -121,6 +121,27 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
             except Exception as e:
                 raise Exception(e)
     return res
+
+
+def get_files_prefix(path, chr_num=2):
+    '''
+    Desc：
+        获取path下所有文件的前缀集合
+    Args：
+        path: str  --  文件路径
+        chr_num: int  --  前缀字符个数
+    Returns：
+        prefix: list  --  前缀集合
+    '''
+    if not os.path.exists(path):
+        return []
+
+    prefix = []
+    for root, subdirs, files in os.walk(path):
+        code = [x[:chr_num] for x in files]
+        prefix = list(set(code))
+
+    return prefix
 
 
 if __name__ == "__main__":
