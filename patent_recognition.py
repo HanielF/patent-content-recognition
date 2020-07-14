@@ -76,8 +76,9 @@ def images_classify(origin_path, target_path, recursive=False):
     # create sub dirs and classify images
     for base in img_base_lst:
         target_dir = os.path.join(target_path, base)
-        os.mkdir(target_dir)
-        os.system("mv " + base + "* " + target_dir)
+        if not os.path.exists(target_dir):
+            os.mkdir(target_dir)
+        os.system("mv " + os.path.join(origin_path, base) + "* " + target_dir)
 
 
 def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
