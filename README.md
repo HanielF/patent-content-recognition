@@ -1,5 +1,7 @@
 # patent-content-recognition
 
+[Chinese README](README_ZH.md)
+
 ## Introduction
 
 It is a simple, practical tool that includes functions of batch converting pdfs to images, recognizing texts in images, and extract information in texts.
@@ -56,7 +58,7 @@ Here it was mainly used to recognize texts in patent files and extract RNA/DNA s
 
 | File Name             | Descriptions             | Comment                                                                                         |
 | --------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| baidu_ocr.py          | include OCR class object | with [百度 OCR](https://ai.baidu.com/tech/ocr/general)                                          |
+| baidu_ocr.py          | include OCR class object | with [BaiDu OCR](https://ai.baidu.com/tech/ocr/general)                                          |
 | convert.py            | convert pdf to images    | with [Imagemagick Convert](https://github.com/ImageMagick/ImageMagick)                          |
 | patent_recognition.py | Main file                |                                                                                                 |
 | README.md             | Descriptions             |                                                                                                 |
@@ -72,7 +74,7 @@ Here it was mainly used to recognize texts in patent files and extract RNA/DNA s
 
 ### Create Baidu OCR instance
 
-1. Sign up/in [baidu ai studio](https://ai.baidu.com/)
+1. Sign up/in [Baidu AI Studio](https://ai.baidu.com/)
 2. Login in console
 3. Create ocr instance
 4. Save your API Key and Secret Key as AK and SK
