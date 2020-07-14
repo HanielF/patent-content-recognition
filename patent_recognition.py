@@ -18,14 +18,16 @@ TARGET_TYPE = 'jpg'
 
 AK = '5aCLlrovDN7DYI6WhIeFGYCN'
 SK = 'mkCGTzUxO9xgHkXmht3tGNEfLZNfShmG'
-REQUEST = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
+REQUEST_GENERAL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
+REQUEST_ACCURATE = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
+REQUEST = REQUEST_ACCURATE
 LANGUAGE_TYPE = 'auto_detect'
 DETECT_DIRECTION = 'true'
 
 def get_dir_files(dir_path=None, extend_path=False):
     '''
     Desc：
-        返回dir_path下所有的非目录文件，并以包含路径的形式返回
+        返回dir_path下所有的非目录文件，并以包含路径的形式返回，也包括子目录下的文件
     Args：
         dir_path: string/list  --  需要遍历的所有目录
         extend_path: Bool  --  是否拼接路径
@@ -79,7 +81,7 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
             try:
                 with open(text_path[i], 'w', encoding='utf-8') as f:
                     for text in img_text:
-                        tmp_text = text['words'].replace(" ", '')
+                        tmp_text = text['words']
                         f.write("{}\n".format(tmp_text))
             except Exception as e:
                 raise Exception(e)
@@ -96,6 +98,10 @@ if __name__ == "__main__":
     convert.convert(origin_path, target_path)
 
     target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
+    for img_roots, img_subdirs, img_files in os.walk(IMAGEFOLDER):
+        img_subdirs = [os.path.join(os.path.abspath(img_roots), x) for x in img_subdirs]
+        target_subdirs = list(set(target_subdirs + img_subdirs))
+        break
 
     ocr = baidu_ocr.Baidu_OCR(AK,
                               SK,
@@ -112,7 +118,7 @@ if __name__ == "__main__":
             os.mkdir(text_subdir)
 
         images_path = get_dir_files(subdir, extend_path=True)
-        if len(images_path) == 0:
+        if len(images_path) == 0 or images_path is None:
             continue
         text_basename = [os.path.basename(x).split('.')[0] + '.txt' for x in images_path]
         text_path = [os.path.join(text_subdir, x) for x in text_basename]
