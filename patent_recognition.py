@@ -10,6 +10,7 @@
 import baidu_ocr
 import convert
 import os
+import sys
 
 IMAGEFOLDER = './images/'
 TEXTFOLDER = './text/'
@@ -45,6 +46,39 @@ def get_dir_files(dir_path=None, extend_path=False):
                 file = [os.path.join(root, x) for x in file]
             res.extend(file)
     return res
+
+def images_classify(origin_path, target_path, recursive=False):
+    '''
+    Desc：
+        将目录中的图片按照名称分类，并保存在各个子目录中
+    Args：
+        origin_path: str  --  源文件路径
+        target_path: str  --  目标文件目录
+        recursize: boolean  --  是否对源文件路径进行递归搜索
+    Returns：
+        None
+    '''
+    # exception
+    if not os.path.exists(origin_path) or not os.path.exists(target_path):
+        sys.exit(0)
+
+    # get images
+    images = []
+    for root, sub_dir, files in os.walk(origin_path):
+        img_file = [x for x in files if x.split('.')[-1] in ['jpg', 'jpeg', 'png']]
+        images.extend(img_file)
+        if not recursive:
+            break
+
+    # get images basename set
+    img_base_lst = list(set([x.split('_')[0] for x in images]))
+
+    # create sub dirs and classify images
+    for base in img_base_lst:
+        target_dir = os.path.join(target_path, base)
+        os.mkdir(target_dir)
+        os.system("mv " + base + "* " + target_dir)
+
 
 def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
     '''
@@ -89,26 +123,33 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
 
 
 if __name__ == "__main__":
+    # get pdf files base name
     origin_path = get_dir_files(DATAPATH, True)
     origin_basename = [os.path.basename(x) for x in origin_path]
 
+    # get target path to save images
     target_name = [x.split('.')[0] + '.' + TARGET_TYPE for x in origin_basename]
     target_path = [os.path.join(IMAGEFOLDER, x.split('.')[0] + '.' + TARGET_TYPE) for x in origin_basename]
 
+    # convert pdf files and classify other images
     convert.convert(origin_path, target_path)
+    images_classify('./images', './images', False)
 
+    # combine directories created in converting with that created in classifying
     target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
     for img_roots, img_subdirs, img_files in os.walk(IMAGEFOLDER):
         img_subdirs = [os.path.join(os.path.abspath(img_roots), x) for x in img_subdirs]
         target_subdirs = list(set(target_subdirs + img_subdirs))
         break
 
+    # create ocr object
     ocr = baidu_ocr.Baidu_OCR(AK,
                               SK,
                               REQUEST,
                               language_type=LANGUAGE_TYPE,
                               detect_direction=DETECT_DIRECTION)
 
+    # recognize images with ocr object and save in TEXTFOLDER
     res_text = []
     for subdir in target_subdirs:
         text_base_dir = os.path.basename(subdir)
