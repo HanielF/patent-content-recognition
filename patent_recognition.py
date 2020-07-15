@@ -62,16 +62,20 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
         error_msg = ocr_response.get("error_msg")
 
         if error_code is not None:
+            error_cnt = 0
             print("==> Request error: error_code={}, error_msg={}".format(error_code, error_msg))
-            while (error_code == 18):
+
+            while (error_code == 18 and error_cnt <= 20):
+                error_cnt += 1
                 print("==> QPS error, Request again")
+
                 ocr_response = ocr_obj.get_img_text(img)
                 img_text = ocr_response.get("words_result")
                 error_code = ocr_response.get("error_code")
                 error_msg = ocr_response.get("error_msg")
 
-            print("==> System exit 1")
             if error_code in [4, 14, 17, 19, 100, 110, 111, 216100, 216101, 216102, 216103, 216110, 216201, 282003, 282110, 282111]:
+                print("==> System exit 1")
                 sys.exit(1)
 
         res.append(img_text)
@@ -132,11 +136,13 @@ if __name__ == "__main__":
 
         if len(os.listdir(text_subdir)) == len(os.listdir(subdir)):
             print("==> {} has already been processed, skip".format(text_base_dir))
+            continue
 
         images_path = get_dir_files(subdir, extend_path=True)
         if len(images_path) == 0 or images_path is None:
             print("==> There are no pictures in {}, continue".format(text_base_dir))
             continue
+
         text_basename = [os.path.basename(x).split('.')[0] + '.txt' for x in images_path]
         text_path = [os.path.join(text_subdir, x) for x in text_basename]
 
