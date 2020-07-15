@@ -55,9 +55,26 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
     # recognize img files and save results
     res = []
     for i, img in enumerate(img_path):
-        img_text = ocr_obj.get_img_text(img).get("words_result")
-        res.append(img_text)
+        ocr_response = ocr_obj.get_img_text(img)
+        img_text = ocr_response.get("words_result")
 
+        error_code = ocr_response.get("error_code")
+        error_msg = ocr_response.get("error_msg")
+
+        if error_code is not None:
+            print("==> Request error: error_code={}, error_msg={}".format(error_code, error_msg))
+            while (error_code == 18):
+                print("==> QPS error, Request again")
+                ocr_response = ocr_obj.get_img_text(img)
+                img_text = ocr_response.get("words_result")
+                error_code = ocr_response.get("error_code")
+                error_msg = ocr_response.get("error_msg")
+
+            print("==> System exit 1")
+            if error_code in [4, 14, 17, 19, 100, 110, 111, 216100, 216101, 216102, 216103, 216110, 216201, 282003, 282110, 282111]:
+                sys.exit(1)
+
+        res.append(img_text)
         if save:
             try:
                 with open(text_path[i], 'w', encoding='utf-8') as f:
@@ -112,6 +129,9 @@ if __name__ == "__main__":
 
         if not os.path.exists(text_subdir):
             os.mkdir(text_subdir)
+
+        if len(os.listdir(text_subdir)) == len(os.listdir(subdir)):
+            print("==> {} has already been processed, skip".format(text_base_dir))
 
         images_path = get_dir_files(subdir, extend_path=True)
         if len(images_path) == 0 or images_path is None:
