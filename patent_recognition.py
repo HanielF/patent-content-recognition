@@ -11,19 +11,20 @@ import baidu_ocr
 import convert
 import os
 import sys
-
-IMAGEFOLDER = './images/'
-TEXTFOLDER = './text/'
-DATAPATH = './data/'
-TARGET_TYPE = 'jpg'
+from file_helper import *
 
 AK = '5aCLlrovDN7DYI6WhIeFGYCN'
 SK = 'mkCGTzUxO9xgHkXmht3tGNEfLZNfShmG'
 REQUEST_GENERAL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
 REQUEST_ACCURATE = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
 REQUEST = REQUEST_GENERAL
-LANGUAGE_TYPE = 'ENG'
+LANGUAGE_TYPE = 'CHN_ENG'
 DETECT_DIRECTION = 'true'
+
+IMAGEFOLDER = './images/' + LANGUAGE_TYPE
+TEXTFOLDER = './text/' + LANGUAGE_TYPE
+DATAPATH = './data/'
+TARGET_TYPE = 'jpg'
 
 
 def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
@@ -60,9 +61,10 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
         if save:
             try:
                 with open(text_path[i], 'w', encoding='utf-8') as f:
-                    for text in img_text:
-                        tmp_text = text['words']
-                        f.write("{}\n".format(tmp_text))
+                    if img_text is not None:
+                        for text in img_text:
+                            tmp_text = text['words']
+                            f.write("{}\n".format(tmp_text))
             except Exception as e:
                 raise Exception(e)
     return res
@@ -72,23 +74,29 @@ if __name__ == "__main__":
     # get pdf files base name
     origin_path = get_dir_files(DATAPATH, True)
     origin_basename = [os.path.basename(x) for x in origin_path]
+    print("==> Get files from {}".format(DATAPATH))
 
     # get target path to save images
     target_name = [x.split('.')[0] + '.' + TARGET_TYPE for x in origin_basename]
     target_path = [os.path.join(IMAGEFOLDER, x.split('.')[0] + '.' + TARGET_TYPE) for x in origin_basename]
 
     # convert pdf files and classify other images
+    print("==> Start converting pdf files to images")
     convert.convert(origin_path, target_path)
-    images_classify('./images', './images', False)
+
+    print("==> Start classifing images in {}".format(IMAGEFOLDER))
+    images_classify(IMAGEFOLDER, IMAGEFOLDER, False)
 
     # combine directories created in converting with that created in classifying
     target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
+    # target_subdirs = []
     for img_roots, img_subdirs, img_files in os.walk(IMAGEFOLDER):
         img_subdirs = [os.path.join(os.path.abspath(img_roots), x) for x in img_subdirs]
         target_subdirs = list(set(target_subdirs + img_subdirs))
         break
 
     # create ocr object
+    print("==> Create baidu ocr object with language_type={} request={}".format(LANGUAGE_TYPE, REQUEST.split('/')[-1]))
     ocr = baidu_ocr.Baidu_OCR(AK,
                               SK,
                               REQUEST,
@@ -96,19 +104,20 @@ if __name__ == "__main__":
                               detect_direction=DETECT_DIRECTION)
 
     # recognize images with ocr object and save in TEXTFOLDER
-    res_text = []
+    print("==> Start recognizing images and results will be saved in {}".format(TEXTFOLDER))
     for subdir in target_subdirs:
         text_base_dir = os.path.basename(subdir)
         text_subdir = os.path.join(TEXTFOLDER, text_base_dir)
+        print("==> Start processing images in \n\t\t{}".format(subdir))
 
         if not os.path.exists(text_subdir):
             os.mkdir(text_subdir)
 
         images_path = get_dir_files(subdir, extend_path=True)
         if len(images_path) == 0 or images_path is None:
+            print("==> There are no pictures in {}, continue".format(text_base_dir))
             continue
         text_basename = [os.path.basename(x).split('.')[0] + '.txt' for x in images_path]
         text_path = [os.path.join(text_subdir, x) for x in text_basename]
 
         img_text = recognize_img(images_path, ocr, text_path, save=True)
-        res_text.append(img_text)
