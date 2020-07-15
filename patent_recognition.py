@@ -11,6 +11,7 @@ import baidu_ocr
 import convert
 import os
 import sys
+import time
 from file_helper import *
 
 AK = '5aCLlrovDN7DYI6WhIeFGYCN'
@@ -92,6 +93,9 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
 
 
 if __name__ == "__main__":
+    # record start time
+    st_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
+    print("==> Start at {}".format(st_time))
     # get pdf files base name
     origin_path = get_dir_files(DATAPATH, True)
     origin_basename = [os.path.basename(x) for x in origin_path]
@@ -110,6 +114,7 @@ if __name__ == "__main__":
 
     # combine directories created in converting with that created in classifying
     target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
+
     # target_subdirs = []
     for img_roots, img_subdirs, img_files in os.walk(IMAGEFOLDER):
         img_subdirs = [os.path.join(os.path.abspath(img_roots), x) for x in img_subdirs]
@@ -147,3 +152,7 @@ if __name__ == "__main__":
         text_path = [os.path.join(text_subdir, x) for x in text_basename]
 
         img_text = recognize_img(images_path, ocr, text_path, save=True)
+
+    # record end time
+    end_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
+    print("==> End at {}".format(end_time))
