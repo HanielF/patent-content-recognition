@@ -22,8 +22,9 @@ REQUEST = REQUEST_GENERAL
 LANGUAGE_TYPE = 'auto_detect'
 DETECT_DIRECTION = 'true'
 
-IMAGEFOLDER = './images/' + LANGUAGE_TYPE
-TEXTFOLDER = './text/' + LANGUAGE_TYPE
+SUBFOLDER = 'auto_detect'
+IMAGEFOLDER = './images/' + SUBFOLDER
+TEXTFOLDER = './text/' + SUBFOLDER
 DATAPATH = './data/'
 TARGET_TYPE = 'jpg'
 
