@@ -54,8 +54,6 @@ def convert(origin_file, target_file, options=[]):
             # continue if it exists
             else:
                 print("==> {} already exists, skip it.".format(sub_dir))
-
-
     except Exception as e:
         print("==> Error: failed to create target directories.")
         sys.exit(1)

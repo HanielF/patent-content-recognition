@@ -19,13 +19,35 @@ SK = 'mkCGTzUxO9xgHkXmht3tGNEfLZNfShmG'
 REQUEST_GENERAL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic"
 REQUEST_ACCURATE = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
 REQUEST = REQUEST_GENERAL
-LANGUAGE_TYPE = 'CHN_ENG'
+LANGUAGE_TYPE = 'auto_detect'
 DETECT_DIRECTION = 'true'
 
 IMAGEFOLDER = './images/' + LANGUAGE_TYPE
 TEXTFOLDER = './text/' + LANGUAGE_TYPE
 DATAPATH = './data/'
 TARGET_TYPE = 'jpg'
+
+LOGPATH = './log/patent_recognition.log'
+LOG_MODE = 'a'
+
+
+def make_log(log_msg, stdout=True, log_file=None, log_obj=None):
+    '''
+    Desc：
+        记录日志，若stdout为True则输出到屏幕，如果log_file路径非None，则同时记录到文件，若log_obj非None，则使用全局变量log_obj，否则使用log_file新建对象
+    Args：
+        log_msg: string  --  待记录日志
+        stdout: boolean  --  是否输出到屏幕就
+    Returns：
+        log_file: string  --  输出文件路径，在log_obj为None时生效
+    '''
+    if stdout:
+        print(log_msg)
+    if log_file is not None and log_obj is not None:
+        log_obj.write(log_msg + '\n')
+    elif log_file is not None and log_obj is None:
+        with open(log_file, LOG_MODE) as obj:
+            obj.write(log_msg + '\n')
 
 
 def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
@@ -64,11 +86,11 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
 
         if error_code is not None:
             error_cnt = 0
-            print("==> Request error: error_code={}, error_msg={}".format(error_code, error_msg))
+            make_log("==> Request error: error_code={}, error_msg={}".format(error_code, error_msg), True, LOGPATH)
 
             while (error_code == 18 and error_cnt <= 20):
                 error_cnt += 1
-                print("==> QPS error, Request again")
+                make_log("==> QPS error, Request again", True, LOGPATH)
 
                 ocr_response = ocr_obj.get_img_text(img)
                 img_text = ocr_response.get("words_result")
@@ -76,7 +98,7 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
                 error_msg = ocr_response.get("error_msg")
 
             if error_code in [4, 14, 17, 19, 100, 110, 111, 216100, 216101, 216102, 216103, 216110, 216201, 282003, 282110, 282111]:
-                print("==> System exit 1")
+                make_log("==> System exit 1", True, LOGPATH)
                 sys.exit(1)
 
         res.append(img_text)
@@ -95,21 +117,21 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
 if __name__ == "__main__":
     # record start time
     st_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
-    print("==> Start at {}".format(st_time))
+    make_log("==> Start at {}".format(st_time), True, LOGPATH)
     # get pdf files base name
     origin_path = get_dir_files(DATAPATH, True)
     origin_basename = [os.path.basename(x) for x in origin_path]
-    print("==> Get files from {}".format(DATAPATH))
+    make_log("==> Get files from {}".format(DATAPATH), True, LOGPATH)
 
     # get target path to save images
     target_name = [x.split('.')[0] + '.' + TARGET_TYPE for x in origin_basename]
     target_path = [os.path.join(IMAGEFOLDER, x.split('.')[0] + '.' + TARGET_TYPE) for x in origin_basename]
 
     # convert pdf files and classify other images
-    print("==> Start converting pdf files to images")
+    make_log("==> Start converting pdf files to images", True, LOGPATH)
     convert.convert(origin_path, target_path)
 
-    print("==> Start classifing images in {}".format(IMAGEFOLDER))
+    make_log("==> Start classifing images in {}".format(IMAGEFOLDER), True, LOGPATH)
     images_classify(IMAGEFOLDER, IMAGEFOLDER, False)
 
     # combine directories created in converting with that created in classifying
@@ -122,7 +144,7 @@ if __name__ == "__main__":
         break
 
     # create ocr object
-    print("==> Create baidu ocr object with language_type={} request={}".format(LANGUAGE_TYPE, REQUEST.split('/')[-1]))
+    make_log("==> Create baidu ocr object with language_type={} request={}".format(LANGUAGE_TYPE, REQUEST.split('/')[-1]), True, LOGPATH)
     ocr = baidu_ocr.Baidu_OCR(AK,
                               SK,
                               REQUEST,
@@ -130,22 +152,22 @@ if __name__ == "__main__":
                               detect_direction=DETECT_DIRECTION)
 
     # recognize images with ocr object and save in TEXTFOLDER
-    print("==> Start recognizing images and results will be saved in {}".format(TEXTFOLDER))
+    make_log("==> Start recognizing images and results will be saved in {}".format(TEXTFOLDER), True, LOGPATH)
     for subdir in target_subdirs:
         text_base_dir = os.path.basename(subdir)
         text_subdir = os.path.join(TEXTFOLDER, text_base_dir)
-        print("==> Start processing images in \n\t\t{}".format(subdir))
+        make_log("==> Start processing images in \n\t\t{}".format(subdir), True, LOGPATH)
 
         if not os.path.exists(text_subdir):
-            os.mkdir(text_subdir)
+            os.system('mkdir -p ' + text_subdir)
 
         if len(os.listdir(text_subdir)) == len(os.listdir(subdir)):
-            print("==> {} has already been processed, skip".format(text_base_dir))
+            make_log("==> {} has already been processed, skip".format(text_base_dir), True, LOGPATH)
             continue
 
         images_path = get_dir_files(subdir, extend_path=True)
         if len(images_path) == 0 or images_path is None:
-            print("==> There are no pictures in {}, continue".format(text_base_dir))
+            make_log("==> There are no pictures in {}, continue".format(text_base_dir), True, LOGPATH)
             continue
 
         text_basename = [os.path.basename(x).split('.')[0] + '.txt' for x in images_path]
@@ -155,4 +177,4 @@ if __name__ == "__main__":
 
     # record end time
     end_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
-    print("==> End at {}".format(end_time))
+    make_log("==> End at {}".format(end_time), True, LOGPATH)
