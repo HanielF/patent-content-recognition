@@ -89,7 +89,7 @@ def images_classify(origin_path, target_path, recursive=False):
         os.system(cmd)
 
 
-def make_log(log_msg, stdout=True, log_file=None, log_obj=None):
+def make_log(log_msg, stdout=True, log_file=None, log_obj=None, log_mode='a'):
     '''
     Desc：
         记录日志，若stdout为True则输出到屏幕，如果log_file路径非None，则同时记录到文件，若log_obj非None，则使用全局变量log_obj，否则使用log_file新建对象
@@ -104,7 +104,7 @@ def make_log(log_msg, stdout=True, log_file=None, log_obj=None):
     if log_file is not None and log_obj is not None:
         log_obj.write(log_msg + '\n')
     elif log_file is not None and log_obj is None:
-        with open(log_file, LOG_MODE) as obj:
+        with open(log_file, log_mode) as obj:
             obj.write(log_msg + '\n')
 
 
