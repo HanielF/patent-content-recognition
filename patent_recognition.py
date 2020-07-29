@@ -32,25 +32,6 @@ LOGPATH = './log/patent_recognition.log'
 LOG_MODE = 'a'
 
 
-def make_log(log_msg, stdout=True, log_file=None, log_obj=None):
-    '''
-    Desc：
-        记录日志，若stdout为True则输出到屏幕，如果log_file路径非None，则同时记录到文件，若log_obj非None，则使用全局变量log_obj，否则使用log_file新建对象
-    Args：
-        log_msg: string  --  待记录日志
-        stdout: boolean  --  是否输出到屏幕就
-    Returns：
-        log_file: string  --  输出文件路径，在log_obj为None时生效
-    '''
-    if stdout:
-        print(log_msg)
-    if log_file is not None and log_obj is not None:
-        log_obj.write(log_msg + '\n')
-    elif log_file is not None and log_obj is None:
-        with open(log_file, LOG_MODE) as obj:
-            obj.write(log_msg + '\n')
-
-
 def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
     '''
     Desc：
@@ -118,27 +99,27 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
 if __name__ == "__main__":
     # record start time
     st_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
-    make_log("==> Start at {}".format(st_time), True, LOGPATH)
-    # get pdf files base name
-    origin_path = get_dir_files(DATAPATH, True)
-    origin_basename = [os.path.basename(x) for x in origin_path]
-    make_log("==> Get files from {}".format(DATAPATH), True, LOGPATH)
+    make_log("\n==> Start at {}".format(st_time), True, LOGPATH)
+    # # get pdf files base name
+    # origin_path = get_dir_files(DATAPATH, True)
+    # origin_basename = [os.path.basename(x) for x in origin_path]
+    # make_log("==> Get files from {}".format(DATAPATH), True, LOGPATH)
 
-    # get target path to save images
-    target_name = [x.split('.')[0] + '.' + TARGET_TYPE for x in origin_basename]
-    target_path = [os.path.join(IMAGEFOLDER, x.split('.')[0] + '.' + TARGET_TYPE) for x in origin_basename]
+    # # get target path to save images
+    # target_name = [x.split('.')[0] + '.' + TARGET_TYPE for x in origin_basename]
+    # target_path = [os.path.join(IMAGEFOLDER, x.split('.')[0] + '.' + TARGET_TYPE) for x in origin_basename]
 
-    # convert pdf files and classify other images
-    make_log("==> Start converting pdf files to images", True, LOGPATH)
-    convert.convert(origin_path, target_path)
+    # # convert pdf files and classify other images
+    # make_log("==> Start converting pdf files to images", True, LOGPATH)
+    # convert.convert(origin_path, target_path)
 
     make_log("==> Start classifing images in {}".format(IMAGEFOLDER), True, LOGPATH)
     images_classify(IMAGEFOLDER, IMAGEFOLDER, False)
 
     # combine directories created in converting with that created in classifying
-    target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
+    # target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
 
-    # target_subdirs = []
+    target_subdirs = []
     for img_roots, img_subdirs, img_files in os.walk(IMAGEFOLDER):
         img_subdirs = [os.path.join(os.path.abspath(img_roots), x) for x in img_subdirs]
         target_subdirs = list(set(target_subdirs + img_subdirs))

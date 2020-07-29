@@ -87,3 +87,23 @@ def images_classify(origin_path, target_path, recursive=False):
 
         cmd = "find " + os.path.abspath(origin_path) + " -name '" + base + "*jpg' -maxdepth 1 | xargs -i mv {} " + target_dir
         os.system(cmd)
+
+
+def make_log(log_msg, stdout=True, log_file=None, log_obj=None):
+    '''
+    Desc：
+        记录日志，若stdout为True则输出到屏幕，如果log_file路径非None，则同时记录到文件，若log_obj非None，则使用全局变量log_obj，否则使用log_file新建对象
+    Args：
+        log_msg: string  --  待记录日志
+        stdout: boolean  --  是否输出到屏幕就
+    Returns：
+        log_file: string  --  输出文件路径，在log_obj为None时生效
+    '''
+    if stdout:
+        print(log_msg)
+    if log_file is not None and log_obj is not None:
+        log_obj.write(log_msg + '\n')
+    elif log_file is not None and log_obj is None:
+        with open(log_file, LOG_MODE) as obj:
+            obj.write(log_msg + '\n')
+
