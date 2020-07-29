@@ -17,13 +17,13 @@ if __name__ == "__main__":
     #     text_files.extend(files)
 
     # res = []
-    # patten = re.compile(r'[NAUGCT]{19,}', re.I)
+    # pattern = re.compile(r'[NAUGCT]{19,}', re.I)
 
     # for f in text_files:
     #     with open(f, 'r') as fp:
     #         lines = fp.readlines()
     #         for line in lines:
-    #             seq = patten.findall(line)
+    #             seq = pattern.findall(line)
     #             res.extend(seq)
 
     # print("共查找到 {} 个符合要求的序列".format(len(res)))
