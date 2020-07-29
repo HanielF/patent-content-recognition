@@ -8,7 +8,7 @@
  * @Desc    :  用于文件处理
 '''
 import os
-
+import re
 
 def get_files_prefix(path, chr_num=2):
     '''
@@ -107,3 +107,44 @@ def make_log(log_msg, stdout=True, log_file=None, log_obj=None):
         with open(log_file, LOG_MODE) as obj:
             obj.write(log_msg + '\n')
 
+
+def extract_seq_from_text(pattern, text_path, save_path=None):
+    '''
+    Desc：
+        从text_path中按照patten提取内容，并返回
+    Args：
+        pattern: re.Pattern  --  正则re.compile后的对象
+        text_path: string  --  文本路径，若为目录则提取所有文件，若为单个文件则直接提取
+        save_path: string  --  结果保存路径，若为None则不保存，直接返回
+    Returns：
+        res: list  --  提取出的序列
+    '''
+    text_files = []
+    res = []
+
+    # get text files
+    if os.path.isdir(text_path):
+        for root, subdir, files in os.walk(text_path):
+            files = [os.path.join(root, f) for f in files]
+            text_files.extend(files)
+    elif os.path.isfile(text_path):
+        text_files.append(text_path)
+    else:
+        raise (ValueError("Error: text_path is neither a dir nor a file"))
+
+    # get files content
+    for f in text_files:
+        with open(f) as fp:
+            lines = ' '.join(fp.readlines())
+            seq = pattern.findall(lines)
+            res.extend(seq)
+
+    # remove redundant seqs
+    res = list(set(res))
+
+    # save results
+    if save_path is not None:
+        with open(save_path, 'w') as fw:
+            fw.writelines([x + ',\n' for x in res])
+
+    return res
