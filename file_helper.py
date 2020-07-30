@@ -85,7 +85,7 @@ def images_classify(origin_path, target_path, recursive=False):
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
 
-        cmd = "find " + os.path.abspath(origin_path) + " -name '" + base + "*jpg' -maxdepth 1 | xargs -i mv {} " + target_dir
+        cmd = "find " + os.path.abspath(origin_path) + " -maxdepth 1 -name '" + base + "*jpg' | xargs -i mv {} " + target_dir
         os.system(cmd)
 
 
