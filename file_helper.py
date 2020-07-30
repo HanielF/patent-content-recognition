@@ -9,6 +9,7 @@
 '''
 import os
 import re
+import sys
 
 def get_files_prefix(path, chr_num=2):
     '''
@@ -52,6 +53,57 @@ def get_dir_files(dir_path=None, extend_path=False):
                 file = [os.path.join(root, x) for x in file]
             res.extend(file)
     return res
+
+
+def patent_classify(origin_path, target_path, patent_dict=None):
+    '''
+    Desc：
+        将专利按照patent_dict中的分类，以开头两个字母区分，并归档到target_path中
+    Args：
+        origin_path: string  --  专利文件所在目录
+        target_path: string  --  分类结果的目标路径
+        patent_dict: dict(list)  --  分类依据，如{'CHN_ENG':[CN]}，若为None则使用默认dict
+    '''
+    # handle exceptions
+    if not os.path.exists(origin_path):
+        raise Exception("origin_path does not exist")
+        return
+    if not os.path.exists(target_path):
+        os.system('mkdir -p ' + target_path)
+    if not isinstance(patent_dict, dict) and patent_dict is not None:
+        raise ValueError("patent_dict should be dict")
+    if patent_dict is None:
+        patent_dict = {'CHN_ENG': ['CN', 'TW'], 'ENG': ['AU', 'CA', 'EP', 'GB', 'NZ', 'SG', 'US'], 'auto_detect': ['WO', 'ID', 'IL', 'NO'], 'FRE': ['FR'], 'JAP': ['JP'], 'KOR': ['KR'], 'others': []}
+
+    prefix = set([x[:2] for x in os.listdir(origin_path)])
+
+    # classify patents
+    for key, val in patent_dict.items():
+        inter_pre = list(prefix & set(val))
+        if len(inter_pre) == 0:
+            continue
+
+        pth = os.path.join(target_path, key)
+        if not os.path.exists(pth):
+            os.mkdir(pth)
+
+        for code in inter_pre:
+            cmd = "mv {}/{}* {}".format(origin_path, code, pth)
+            os.system(cmd)
+
+    # classify patents not in patent_dict
+    other_patent = []
+    for i in os.listdir(origin_path):
+        if i[:2] not in patent_dict.keys() and i not in patent_dict.keys():
+            other_patent.append(i)
+
+    if len(other_patent) > 0:
+        pth = os.path.join(target_path, 'others')
+        if not os.path.exists(pth):
+            os.mkdir(pth)
+        for i in other_patent:
+            os.system("mv {}/{} {}".format(origin_path, i, pth))
+
 
 def images_classify(origin_path, target_path, recursive=False):
     '''
@@ -148,3 +200,6 @@ def extract_seq_from_text(pattern, text_path, save_path=None):
             fw.writelines([x + ',\n' for x in res])
 
     return res
+
+if __name__ == "__main__":
+    patent_classify('./images/20200712012743948', './images/20200712012743948')
