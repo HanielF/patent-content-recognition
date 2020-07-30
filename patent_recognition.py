@@ -23,13 +23,32 @@ LANGUAGE_TYPE = 'auto_detect'
 DETECT_DIRECTION = 'true'
 
 SUBFOLDER = 'auto_detect'
-IMAGEFOLDER = './images/' + SUBFOLDER
-TEXTFOLDER = './text/' + SUBFOLDER
+IMAGEFOLDER = './images/20200712012743948/' + SUBFOLDER
+TEXTFOLDER = './text/20200712012743948/' + SUBFOLDER
 DATAPATH = './data/'
 TARGET_TYPE = 'jpg'
 
 LOGPATH = './log/patent_recognition.log'
 LOG_MODE = 'a'
+
+
+def cal_time(start_time, end_time):
+    '''
+    Desc：
+        计算时间差，返回小时，分钟和秒
+    Args：
+        start_time  --  开始时间
+        end_time  --  结束时间
+    Returns：
+        elapsed_hours, elapsed_mins, elapsed_secs  --  经过的小时，分钟，秒
+    '''
+    if end_time < start_time:
+        raise ValueError("结束时间不可小于开始时间")
+    elapsed_time = end_time - start_time
+    elapsed_hours = int(elapsed_time // 3600)
+    elapsed_mins = int((elapsed_time - elapsed_hours * 3600) // 60)
+    elapsed_secs = int(elapsed_time - elapsed_mins * 60 - elapsed_hours * 3600)
+    return elapsed_hours, elapsed_mins, elapsed_secs
 
 
 def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
@@ -60,17 +79,28 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
     # recognize img files and save results
     res = []
     for i, img in enumerate(img_path):
+        # continue if images i was recognized before
+        if os.path.exists(text_path[i]) and os.path.getsize(text_path[i]) > 0:
+            continue
+
+        make_log("==>\t\tcurrent image: {}".format(os.path.basename(img)), True, LOGPATH)
+
+        # recognize current pic
         ocr_response = ocr_obj.get_img_text(img)
         img_text = ocr_response.get("words_result")
 
+        # get error code and message
         error_code = ocr_response.get("error_code")
         error_msg = ocr_response.get("error_msg")
 
+        # request again if error occurs
         if error_code is not None:
             error_cnt = 0
             make_log("==> Request error: error_code={}, error_msg={}".format(error_code, error_msg), True, LOGPATH)
 
+            # repeat request several times
             while (error_code == 18 and error_cnt <= 20):
+                time.sleep(0.5)
                 error_cnt += 1
                 make_log("==> QPS error, Request again", True, LOGPATH)
 
@@ -79,10 +109,12 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
                 error_code = ocr_response.get("error_code")
                 error_msg = ocr_response.get("error_msg")
 
-            if error_code in [4, 14, 17, 19, 100, 110, 111, 216100, 216101, 216102, 216103, 216110, 216201, 282003, 282110, 282111]:
+            # exit in some cases
+            if error_code in [4, 14, 17, 19, 100, 110, 111, 216100, 216101, 216102, 216103, 216110, 282003, 282110, 282111]:
                 make_log("==> System exit 1", True, LOGPATH)
                 sys.exit(1)
 
+        # save results of ocr
         res.append(img_text)
         if save:
             try:
@@ -98,8 +130,11 @@ def recognize_img(img_path, ocr_obj=None, text_path=None, save=False):
 
 if __name__ == "__main__":
     # record start time
-    st_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
-    make_log("\n==> Start at {}".format(st_time), True, LOGPATH)
+    st_time_stamp = time.time()
+    st_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime(st_time_stamp))
+    make_log("\n\n" + "=" * 50, True, LOGPATH)
+    make_log("==> Start at {}".format(st_time), True, LOGPATH)
+
     # # get pdf files base name
     # origin_path = get_dir_files(DATAPATH, True)
     # origin_basename = [os.path.basename(x) for x in origin_path]
@@ -135,18 +170,27 @@ if __name__ == "__main__":
 
     # recognize images with ocr object and save in TEXTFOLDER
     make_log("==> Start recognizing images and results will be saved in {}".format(TEXTFOLDER), True, LOGPATH)
+    # target_subdirs are images directories
     for subdir in target_subdirs:
+        # get current text directory
         text_base_dir = os.path.basename(subdir)
         text_subdir = os.path.join(TEXTFOLDER, text_base_dir)
-        make_log("==> Start processing images in \n\t\t{}".format(subdir), True, LOGPATH)
 
+        # make log
+        cur_time_stamp = time.time()
+        h, m, s = cal_time(st_time_stamp, cur_time_stamp)
+        make_log("==> Start processing images in \t({}h:{}m:{}s passed)\n\t\t{}".format(h, m, s, subdir), True, LOGPATH)
+
+        # create it if not exist
         if not os.path.exists(text_subdir):
             os.system('mkdir -p ' + text_subdir)
 
+        # skip current image directory
         if len(os.listdir(text_subdir)) == len(os.listdir(subdir)):
             make_log("==> {} has already been processed, skip".format(text_base_dir), True, LOGPATH)
             continue
 
+        # get all of images
         images_path = get_dir_files(subdir, extend_path=True)
         if len(images_path) == 0 or images_path is None:
             make_log("==> There are no pictures in {}, continue".format(text_base_dir), True, LOGPATH)
@@ -160,3 +204,4 @@ if __name__ == "__main__":
     # record end time
     end_time = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
     make_log("==> End at {}".format(end_time), True, LOGPATH)
+    make_log("\n\n" + "=" * 50, True, LOGPATH)
