@@ -32,7 +32,7 @@ def get_files_prefix(path, chr_num=2):
     return prefix
 
 
-def get_dir_files(dir_path=None, extend_path=False):
+def get_dir_files(dir_path=None, extend_path=False, recur=True):
     '''
     Desc：
         返回dir_path下所有的非目录文件，并以包含路径的形式返回，也包括子目录下的文件
@@ -52,6 +52,8 @@ def get_dir_files(dir_path=None, extend_path=False):
             if extend_path:
                 file = [os.path.join(root, x) for x in file]
             res.extend(file)
+            if not recur:
+                break
     return res
 
 
