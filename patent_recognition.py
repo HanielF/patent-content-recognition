@@ -22,9 +22,9 @@ REQUEST = REQUEST_GENERAL
 LANGUAGE_TYPE = 'auto_detect'
 DETECT_DIRECTION = 'true'
 
-SUBFOLDER = 'auto_detect'
-IMAGEFOLDER = './images/20200712012743948/' + SUBFOLDER
-TEXTFOLDER = './text/20200712012743948/' + SUBFOLDER
+SUBFOLDER = ''
+IMAGEFOLDER = os.path.abspath('./images/20200712012743948/' + SUBFOLDER)
+TEXTFOLDER = os.path.abspath('./text/20200712012743948/' + SUBFOLDER)
 DATAPATH = './data/'
 TARGET_TYPE = 'jpg'
 
@@ -154,11 +154,11 @@ if __name__ == "__main__":
     # combine directories created in converting with that created in classifying
     # target_subdirs = [os.path.abspath(x).split('.')[0] for x in target_path]
 
+    # target_subdirs: abspath of image folders
     target_subdirs = []
     for img_roots, img_subdirs, img_files in os.walk(IMAGEFOLDER):
         img_subdirs = [os.path.join(os.path.abspath(img_roots), x) for x in img_subdirs]
         target_subdirs = list(set(target_subdirs + img_subdirs))
-        break
 
     # create ocr object
     make_log("==> Create baidu ocr object with language_type={} request={}".format(LANGUAGE_TYPE, REQUEST.split('/')[-1]), True, LOGPATH)
@@ -174,7 +174,7 @@ if __name__ == "__main__":
     for subdir in target_subdirs:
         # get current text directory
         text_base_dir = os.path.basename(subdir)
-        text_subdir = os.path.join(TEXTFOLDER, text_base_dir)
+        text_subdir = subdir.replace(IMAGEFOLDER, TEXTFOLDER)
 
         # make log
         cur_time_stamp = time.time()
@@ -188,10 +188,10 @@ if __name__ == "__main__":
         # skip current image directory
         if len(os.listdir(text_subdir)) == len(os.listdir(subdir)):
             make_log("==> {} has already been processed, skip".format(text_base_dir), True, LOGPATH)
-            continue
+            # continue
 
         # get all of images
-        images_path = get_dir_files(subdir, extend_path=True)
+        images_path = get_dir_files(subdir, extend_path=True, recur=False)
         if len(images_path) == 0 or images_path is None:
             make_log("==> There are no pictures in {}, continue".format(text_base_dir), True, LOGPATH)
             continue
