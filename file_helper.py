@@ -63,6 +63,8 @@ def patent_classify(origin_path, target_path, patent_dict=None):
         origin_path: string  --  专利文件所在目录
         target_path: string  --  分类结果的目标路径
         patent_dict: dict(list)  --  分类依据，如{'CHN_ENG':[CN]}，若为None则使用默认dict
+    Tip:
+        CN中国，TW台湾，AU澳大利亚，CA加拿大，EP欧洲，GB英国，NZ新西兰，SG新加坡，WO全球，ID印度尼西亚，IL以色列，NO挪威，FR法国，KR韩国，AR阿根廷，CZ捷克，DE德国，DK丹麦，MA摩洛哥
     '''
     # handle exceptions
     if not os.path.exists(origin_path):
@@ -73,7 +75,7 @@ def patent_classify(origin_path, target_path, patent_dict=None):
     if not isinstance(patent_dict, dict) and patent_dict is not None:
         raise ValueError("patent_dict should be dict")
     if patent_dict is None:
-        patent_dict = {'CHN_ENG': ['CN', 'TW'], 'ENG': ['AU', 'CA', 'EP', 'GB', 'NZ', 'SG', 'US'], 'auto_detect': ['WO', 'ID', 'IL', 'NO'], 'FRE': ['FR'], 'JAP': ['JP'], 'KOR': ['KR'], 'others': []}
+        patent_dict = {'CHN_ENG': ['CN', 'TW'], 'ENG': ['AU', 'CA', 'EP', 'GB', 'NZ', 'SG', 'US'], 'auto_detect': ['WO', 'ID', 'IL', 'NO', 'EA', 'OA', 'CZ', 'AR'], 'FRE': ['FR'], 'JAP': ['JP'], 'KOR': ['KR'], 'others': [], 'GER': ['DE'], 'DAN': ['DK'], 'IND': ['ID']}
 
     prefix = set([x[:2] for x in os.listdir(origin_path)])
 
@@ -202,4 +204,5 @@ def extract_seq_from_text(pattern, text_path, save_path=None):
     return res
 
 if __name__ == "__main__":
-    patent_classify('./images/20200712012743948', './images/20200712012743948')
+    # images_classify("./images/20200712012804297", "./images/20200712012804297")
+    patent_classify("./images/20200712012804297", "./images/20200712012804297")
